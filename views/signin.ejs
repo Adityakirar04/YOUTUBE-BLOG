@@ -6,47 +6,61 @@
 </head>
 <body>
 
-    <%- include("./partials/nav") %>
+    <!DOCTYPE html>
 
-    <div class="container mt-4">
+<html lang="en">
+<head>
+    <%- include("./partials/head") %>
+    <title>Sign In</title>
+</head>
+<body>
 
-        <h2>Sign in</h2>
+```
+<%- include("./partials/nav") %>
 
-        <form action="/user/signin" method="POST">
+<div class="container mt-4">
 
-          
+    <h2>Sign In</h2>
 
-            <div class="mb-3">
-                <label class="form-label">Email</label>
-                <input
-                    type="email"
-                    class="form-control"
-                    name="email"
-                    placeholder="Enter your email"
-                    required
-                >
-            </div>
+    <form action="/user/signin" method="POST">
 
-            <div class="mb-3">
-                <label class="form-label">Password</label>
-                <input
-                    type="password"
-                    class="form-control"
-                    name="password"
-                    placeholder="Enter your password"
-                    required
-                >
-            </div>
+        <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input
+                type="email"
+                class="form-control"
+                name="email"
+                placeholder="Enter your email"
+                required
+            >
+        </div>
 
-            <button type="submit" class="btn btn-primary">
-                Sign in
-            </button>
+        <div class="mb-3">
+            <label class="form-label">Password</label>
+            <input
+                type="password"
+                class="form-control"
+                name="password"
+                placeholder="Enter your password"
+                required
+            >
+        </div>
 
-        </form>
+        <button type="submit" class="btn btn-primary">
+            Sign In
+        </button>
 
+    </form>
+
+    <div class="mt-3">
+        Don't have an account?
+        <a href="/user/signup">Sign Up</a>
     </div>
 
-    <%- include("./partials/scripts") %>
+</div>
+
+<%- include("./partials/scripts") %>
+```
 
 </body>
 </html>
