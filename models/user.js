@@ -1,45 +1,75 @@
- const { Router } = require("express");
-const User = require("../models/user");
+ const { createHmac, randomBytes } = require("crypto");
+const { Schema, model } = require("mongoose");
+const { createTokenForUser } = require("../services/authentication");
 
-const router = Router();
+const userSchema = new Schema(
+  {
+    fullName: {
+      type: String,
+      required: true,
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    salt: {
+      type: String,
+    },
+    password: {
+      type: String,
+      required: true,
+    },
+    profileImageURL: {
+      type: String,
+      default: "/images/default.webp",
+    },
+    role: {
+      type: String,
+      enum: ["USER", "ADMIN"],
+      default: "USER",
+    },
+  },
+  { timestamps: true }
+);
 
-router.get("/signin", (req, res) => {
-  return res.render("signin");
+userSchema.pre("save", function (next) {
+  const user = this;
+
+  if (!user.isModified("password")) return;
+
+  const salt = randomBytes(16).toString();
+  const hashedPassword = createHmac("sha256", salt)
+    .update(user.password)
+    .digest("hex");
+
+  this.salt = salt;
+  this.password = hashedPassword;
+
+  next();
 });
 
-router.get("/signup", (req, res) => {
-  return res.render("signup");
-});
+userSchema.static(
+  "matchPasswordAndGenerateToken",
+  async function (email, password) {
+    const user = await this.findOne({ email });
+    if (!user) throw new Error("User not found!");
 
-router.post("/signin", async (req, res) => {
-  const { email, password } = req.body;
+    const salt = user.salt;
+    const hashedPassword = user.password;
 
-  try {
-    const token = await User.matchPasswordAndGenerateToken(
-      email,
-      password
-    );
+    const userProvidedHash = createHmac("sha256", salt)
+      .update(password)
+      .digest("hex");
 
-    console.log("TOKEN", token);
+    if (hashedPassword !== userProvidedHash)
+      throw new Error("Incorrect Password");
 
-    return res.redirect("/");
-  } catch (error) {
-    return res.render("signin", {
-      error: "Incorrect Email or Password",
-    });
+    const token = createTokenForUser(user);
+    return token;
   }
-});
+);
 
-router.post("/signup", async (req, res) => {
-  const { fullName, email, password } = req.body;
+const User = model("user", userSchema);
 
-  await User.create({
-    fullName,
-    email,
-    password,
-  });
-
-  return res.redirect("/");
-});
-
-module.exports = router;
+module.exports = User;
