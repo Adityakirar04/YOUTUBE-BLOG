@@ -1,4 +1,5 @@
- const path = require("path");
+require("dotenv").config();
+const path = require("path");
 const express = require("express");
 const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
@@ -29,18 +30,27 @@ app.set("views", path.resolve("./views"));
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
+// IMPORTANT
+app.use(express.static(path.resolve("./public")));
+
 app.use(checkForAuthenticationCookie("token"));
 
-// Routes
+// Home Route
 app.get("/", async (req, res) => {
-  const allBlogs = await Blog.find({});
+  try {
+    const allBlogs = await Blog.find({});
 
-  return res.render("home", {
-    user: req.user,
-    blogs: allBlogs,
-  });
+    return res.render("home", {
+      user: req.user,
+      blogs: allBlogs,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.send(error.message);
+  }
 });
 
+// Routes
 app.use("/user", userRoute);
 app.use("/blog", blogRoute);
 

@@ -1,0 +1,114 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('./partials/head') %>
+  <title><%= blog.title %></title>
+</head>
+
+<body>
+  <%- include('./partials/nav') %>
+
+  <div class="container mt-4">
+
+    <div class="card shadow-sm">
+
+      <img
+        src="<%= blog.coverImageURL %>"
+        class="card-img-top img-fluid"
+        alt="Blog Image"
+        style="max-height:500px; object-fit:cover;"
+      />
+
+      <div class="card-body">
+
+        <h1 class="card-title mb-4">
+          <%= blog.title %>
+        </h1>
+
+        <div class="d-flex align-items-center mb-4">
+          <img
+            src="<%= blog.createdBy.profileImageURL %>"
+            width="50"
+            height="50"
+            class="rounded-circle me-2"
+          />
+
+          <strong>
+            <%= blog.createdBy.fullName %>
+          </strong>
+        </div>
+
+        <p class="fs-5">
+          <%= blog.body %>
+        </p>
+
+      </div>
+    </div>
+
+  </div>
+
+  <div class="container mt-5">
+
+    <h3>Comments (<%= comments.length %>)</h3>
+
+    <% if (locals.user) { %>
+
+    <form action="/blog/comment/<%= blog._id %>" method="POST">
+
+      <div class="mb-3">
+
+        <textarea
+          name="content"
+          class="form-control"
+          rows="3"
+          placeholder="Write a comment..."
+        ></textarea>
+
+      </div>
+
+      <button class="btn btn-primary">
+        Add Comment
+      </button>
+
+    </form>
+
+    <% } %>
+
+    <hr>
+
+    <% comments.forEach(comment => { %>
+
+    <div class="card mb-3">
+
+      <div class="card-body">
+
+        <div class="d-flex align-items-center mb-2">
+
+          <img
+            src="<%= comment.createdBy.profileImageURL %>"
+            width="40"
+            height="40"
+            class="rounded-circle me-2"
+          />
+
+          <strong>
+            <%= comment.createdBy.fullName %>
+          </strong>
+
+        </div>
+
+        <p class="mb-0">
+          <%= comment.content %>
+        </p>
+
+      </div>
+
+    </div>
+
+    <% }) %>
+
+  </div>
+
+  <%- include('./partials/scripts') %>
+</body>
+</html>
