@@ -11,16 +11,15 @@ const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, path.resolve("./public/uploads"));
   },
-
   filename: function (req, file, cb) {
-    const fileName = Date.now() + "-" + file.originalname;
-    cb(null, fileName);
+    cb(null, Date.now() + "-" + file.originalname);
   },
 });
 
 const upload = multer({ storage });
 
 router.get("/add-new", (req, res) => {
+  console.log("GET /blog/add-new");
   return res.render("addBlog", {
     user: req.user,
   });
@@ -39,9 +38,9 @@ router.get("/:id", async (req, res) => {
       blog,
       comments,
     });
-  } catch (error) {
-    console.log(error);
-    return res.send(error.message);
+  } catch (err) {
+    console.log(err);
+    return res.send(err.message);
   }
 });
 
@@ -54,35 +53,40 @@ router.post("/comment/:blogId", async (req, res) => {
     });
 
     return res.redirect("/blog/" + req.params.blogId);
-  } catch (error) {
-    console.log(error);
-    return res.send(error.message);
+  } catch (err) {
+    console.log(err);
+    return res.send(err.message);
   }
 });
 
 router.post("/", upload.single("coverImage"), async (req, res) => {
-  try {
-    const { title, body } = req.body;
+  console.log("POST /blog HIT");
+  console.log("BODY:", req.body);
+  console.log("FILE:", req.file);
+  console.log("USER:", req.user);
 
+  try {
     if (!req.user) {
       return res.send("User not logged in");
     }
 
     if (!req.file) {
-      return res.send("Please upload an image");
+      return res.send("Please upload image");
     }
 
     const blog = await Blog.create({
-      title,
-      body,
+      title: req.body.title,
+      body: req.body.body,
       createdBy: req.user._id,
       coverImageURL: "/uploads/" + req.file.filename,
     });
 
+    console.log("BLOG CREATED:", blog);
+
     return res.redirect("/blog/" + blog._id);
-  } catch (error) {
-    console.log(error);
-    return res.send(error.message);
+  } catch (err) {
+    console.log(err);
+    return res.send(err.message);
   }
 });
 

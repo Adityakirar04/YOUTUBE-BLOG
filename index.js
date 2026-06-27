@@ -1,4 +1,5 @@
-require("dotenv").config();
+ require("dotenv").config();
+
 const path = require("path");
 const express = require("express");
 const mongoose = require("mongoose");
@@ -14,47 +15,40 @@ const {
 } = require("./middlewares/authentication");
 
 const app = express();
-const PORT = 8000;
 
-// MongoDB Connection
+const PORT = process.env.PORT || 8000;
+
 mongoose
-  .connect("mongodb://127.0.0.1:27017/blogify")
+  .connect(process.env.MONGO_URL)
   .then(() => console.log("MongoDB Connected"))
-  .catch((err) => console.log(err));
+  .catch((err) => console.log("Mongo Error:", err));
 
-// View Engine
 app.set("view engine", "ejs");
 app.set("views", path.resolve("./views"));
 
-// Middlewares
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-
-// IMPORTANT
 app.use(express.static(path.resolve("./public")));
 
 app.use(checkForAuthenticationCookie("token"));
 
-// Home Route
 app.get("/", async (req, res) => {
   try {
     const allBlogs = await Blog.find({});
 
-    return res.render("home", {
+    res.render("home", {
       user: req.user,
       blogs: allBlogs,
     });
-  } catch (error) {
-    console.log(error);
-    return res.send(error.message);
+  } catch (err) {
+    console.log(err);
+    res.send(err.message);
   }
 });
 
-// Routes
 app.use("/user", userRoute);
 app.use("/blog", blogRoute);
 
-// Start Server
 app.listen(PORT, () => {
-  console.log(`Server Started at PORT:${PORT}`);
+  console.log(`Server Started at PORT: ${PORT}`);
 });
